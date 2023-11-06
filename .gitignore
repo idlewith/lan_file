@@ -9,9 +9,10 @@ nohup.out
 *.log
 push/client.py
 *.png
-*.html
+t.html
 *news*.txt
 *.db
+lan_folder
 *.pclprof
 test_t.py
 downloads

@@ -15,7 +15,9 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7, <4"
+python = ">=3.8, <4"
+flask = "^3.0.0"
+werkzeug = "^3.0.1"
 
 [tool.poetry.dev-dependencies]
 
