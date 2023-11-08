@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lan_file"
-version = "0.0.1"
+version = "0.0.2"
 description = "LAN file description"
 authors = ["idlewith <newellzhou@163.com>"]
 license = "MIT"
