@@ -13,6 +13,13 @@ classifiers = [
     "Natural Language :: English",
     "Operating System :: OS Independent",
 ]
+exclude = [
+    "src/lan_file/.DS_Store",
+    "src/lan_file/lan_folder",
+    "src/lan_file/.mypy_cache",
+    "src/lan_file/t.py",
+    "src/lan_file/templates/t.html",
+]
 
 [tool.poetry.dependencies]
 python = ">=3.8, <4"
