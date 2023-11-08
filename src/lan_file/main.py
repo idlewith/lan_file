@@ -1,48 +1,88 @@
-import logging
+"""
+Flask main app
+"""
 
-from flask import Flask, render_template, request, send_from_directory
+import logging
 import os
 
-from werkzeug import run_simple
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_file,
+    redirect,
+    url_for, Response,
+)
+from werkzeug.datastructures.file_storage import FileStorage
+from werkzeug.wrappers import Response as BaseResponse
 
+from lan_file import file_utils
 from lan_file import net
 
-app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = "lan_folder"
+app: Flask = Flask(__name__)
+LAN_FOLDER: str = "lan_folder"
+app.config["UPLOAD_FOLDER"] = LAN_FOLDER
 
-log = logging.getLogger("werkzeug")
+log: logging.Logger = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 
 @app.route("/")
-def index():
-    return render_template("upload.html")
+def index() -> str:
+    """
+    root url
+    :return: html file
+    """
+    files: list = file_utils.get_files_sorted_by_time(LAN_FOLDER)
+    return render_template("upload.html", files=files)
 
 
 @app.route("/upload", methods=["GET", "POST"])
-def upload_file():
+def upload_file() -> BaseResponse:
+    """
+    upload a file
+    :return: redirect to root url
+    """
     if request.method == "POST":
-        file = request.files["file"]
+        file: FileStorage = request.files["file"]
         if file:
-            filename = file.filename
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-            return f"File {filename} uploaded successfully."
+            filename: str = str(file.filename)
+            if file_utils.is_file_exist(filename, LAN_FOLDER):
+                filename = file_utils.rename_file(filename)
 
-    return render_template("upload.html")
+            if filename.strip():
+                file.save(os.path.join(LAN_FOLDER, filename))
+
+                prompt: str = f"File {filename} uploaded successfully."
+                print(prompt)
+
+            return redirect(url_for("index"))
+
+    return redirect(url_for("index"))
 
 
-@app.route("/files/<filename>")
-def uploaded_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+@app.route("/download/<filename>")
+def download_file(filename: str) -> Response:
+    """
+    download file
+    :param filename: a file already uploaded
+    :return: send a file
+    """
+    file_path = os.path.join(LAN_FOLDER, filename)
+    return send_file(file_path, as_attachment=True)
 
 
-def main():
+def main() -> None:
+    """
+    if lan folder not exist, create folder,
+    then start service
+    """
     if not os.path.exists(app.config["UPLOAD_FOLDER"]):
         os.makedirs(app.config["UPLOAD_FOLDER"])
 
-    port = 5555
+    port: int = 5555
     print(f"Running on http://{net.get_local_ip()}:{port}")
-    run_simple("0.0.0.0", port, app)
+    app.run("0.0.0.0", port, debug=False)
 
 
 if __name__ == "__main__":

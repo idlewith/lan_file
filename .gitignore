@@ -27,3 +27,4 @@ start_server.py
 auto.sh
 restart.sh
 t.json
+.mypy_cache
