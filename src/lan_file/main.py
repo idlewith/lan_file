@@ -20,8 +20,10 @@ from lan_file import file_utils
 from lan_file import net
 
 app: Flask = Flask(__name__)
-LAN_FOLDER: str = "lan_folder"
-app.config["UPLOAD_FOLDER"] = LAN_FOLDER
+LAN_FOLDER_NAME: str = "lan_folder"
+CURRENT_DIR: str = os.getcwd()
+LAN_FOLDER: str = os.path.join(CURRENT_DIR, LAN_FOLDER_NAME)
+app.config["UPLOAD_FOLDER"] = LAN_FOLDER_NAME
 
 log: logging.Logger = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
@@ -77,8 +79,8 @@ def main() -> None:
     if lan folder not exist, create folder,
     then start service
     """
-    if not os.path.exists(app.config["UPLOAD_FOLDER"]):
-        os.makedirs(app.config["UPLOAD_FOLDER"])
+    if not os.path.exists(LAN_FOLDER):
+        os.makedirs(LAN_FOLDER)
 
     port: int = 5555
     print(f"Running on http://{net.get_local_ip()}:{port}")
