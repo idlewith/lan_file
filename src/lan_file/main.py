@@ -23,20 +23,44 @@ app: Flask = Flask(__name__)
 LAN_FOLDER_NAME: str = "lan_folder"
 CURRENT_DIR: str = os.getcwd()
 LAN_FOLDER: str = os.path.join(CURRENT_DIR, LAN_FOLDER_NAME)
+CLIPBOARD_FILE_PATH: str = os.path.join(LAN_FOLDER, 'clipboard.txt')
 app.config["UPLOAD_FOLDER"] = LAN_FOLDER_NAME
 
 log: logging.Logger = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 
-@app.route("/")
-def index() -> str:
+def read_file():
+    try:
+        with open(CLIPBOARD_FILE_PATH, 'r', encoding='utf-8') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return ""
+
+
+def write_file(content):
+    with open(CLIPBOARD_FILE_PATH, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+
+@app.route("/", methods=["GET", "POST"])
+def index():
     """
     root url
     :return: html file
     """
     files: list = file_utils.get_files_sorted_by_time(LAN_FOLDER)
-    return render_template("upload.html", files=files)
+
+    if request.method == 'POST':
+        content: str = request.form.get('content', '')
+        print(f"content: {content}")
+        write_file(content)
+
+    return render_template(
+        "upload.html",
+        files=files,
+        content=read_file(),
+    )
 
 
 @app.route("/upload", methods=["GET", "POST"])
